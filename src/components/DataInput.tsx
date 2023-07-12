@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import styled from '@mui/system/styled';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
+import { usePersonState } from '@/hooks/person';
 
 const Item = styled('div')({
   display: 'flex',
@@ -19,6 +20,7 @@ const InputFieldName = styled('span')({
 export default function DataInput() {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
+  const addPerson = usePersonState((state) => state.addPerson);
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
@@ -26,7 +28,9 @@ export default function DataInput() {
     setAge(e.target.value);
   };
   const handleAddRow = () => {
-    console.log(name, age);
+    addPerson({ name, age: parseInt(age, 10) });
+    setName('');
+    setAge('');
   };
   return (
     <Box sx={{ width: '100%' }}>
@@ -43,9 +47,8 @@ export default function DataInput() {
             variant="outlined"
             size="small"
             onChange={handleNameChange}
-          >
-            {name}
-          </TextField>
+            value={name}
+          />
         </Item>
         <Item>
           <InputFieldName>Age</InputFieldName>
@@ -55,9 +58,8 @@ export default function DataInput() {
             variant="outlined"
             size="small"
             onChange={handleAgeChange}
-          >
-            {age}
-          </TextField>
+            value={age}
+          />
         </Item>
         <Item
           sx={{ width: '100%', padding: '0 25%', justifyContent: 'center' }}
