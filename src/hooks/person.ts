@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Person } from '@/types/data';
+import type { Person } from '@/schemas/data';
 
 interface PersonState {
   persons: Person[];

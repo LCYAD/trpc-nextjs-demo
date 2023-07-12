@@ -7,6 +7,8 @@ import styled from '@mui/system/styled';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 import { usePersonState } from '@/hooks/person';
+import { PersonSchema } from '@/schemas/data';
+import { z } from 'zod';
 
 const Item = styled('div')({
   display: 'flex',
@@ -19,18 +21,24 @@ const InputFieldName = styled('span')({
 
 export default function DataInput() {
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [age, setAge] = useState(1);
+  const AgeSchema = z.number().gte(1).lte(120);
+  const isValidAge = AgeSchema.safeParse(age).success;
+
   const addPerson = usePersonState((state) => state.addPerson);
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
   const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAge(e.target.value);
+    setAge(parseInt(e.target.value, 10));
   };
   const handleAddRow = () => {
-    addPerson({ name, age: parseInt(age, 10) });
-    setName('');
-    setAge('');
+    const person = PersonSchema.safeParse({ name, age });
+    if (person.success) {
+      addPerson(person.data);
+      setName('');
+      setAge(1);
+    }
   };
   return (
     <Box sx={{ width: '100%' }}>
@@ -54,11 +62,16 @@ export default function DataInput() {
           <InputFieldName>Age</InputFieldName>
           <TextField
             required
+            type="number"
             id="age"
             variant="outlined"
             size="small"
             onChange={handleAgeChange}
             value={age}
+            error={!isValidAge}
+            helperText={
+              !isValidAge ? 'Need to be a number between 1 and 120' : ''
+            }
           />
         </Item>
         <Item

@@ -1,4 +1,4 @@
-import { Person } from '@/types/data';
+import { Person } from '@/schemas/data';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
