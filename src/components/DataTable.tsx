@@ -15,9 +15,6 @@ export default function DataTable() {
   const rows: Person[] = usePersonState((state) => state.persons) ?? [];
   const removePerson = usePersonState((state) => state.removePerson);
   const clearAll = usePersonState((state) => state.clearAll);
-  const handleClearAll = () => {
-    clearAll();
-  };
 
   return (
     <TableContainer component={Paper} sx={{ height: '100% !important' }}>
@@ -35,7 +32,7 @@ export default function DataTable() {
                   width: 150,
                   padding: '5px 0px',
                 }}
-                onClick={handleClearAll}
+                onClick={clearAll}
               >
                 Clear All
               </Button>
