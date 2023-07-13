@@ -1,4 +1,3 @@
-import { Person } from '@/schemas/data';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -10,11 +9,53 @@ import { usePersonState } from '@/hooks/person';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button } from '@mui/material';
+import {
+  QueryClient,
+  dehydrate,
+  useMutation,
+  useQuery,
+} from '@tanstack/react-query';
+import { getPersons, clearPersons, removePerson } from '@/utils/api';
+import { Person } from '@/schemas/data';
+
+export async function getServerSideProps() {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery(['persons'], getPersons);
+
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+    },
+  };
+}
 
 export default function DataTable() {
-  const rows: Person[] = usePersonState((state) => state.persons) ?? [];
-  const removePerson = usePersonState((state) => state.removePerson);
-  const clearAll = usePersonState((state) => state.clearAll);
+  const rows = usePersonState((state) => state.persons);
+  const updatePersons = usePersonState((state) => state.updatePersons);
+  useQuery({
+    queryKey: ['persons'],
+    queryFn: getPersons,
+    onSuccess: (data: Person[]) => {
+      updatePersons(data);
+    },
+  });
+
+  const removePersonMutation = useMutation({
+    mutationKey: ['persons'],
+    mutationFn: removePerson,
+    onSuccess: (data: Person[]) => {
+      updatePersons(data);
+    },
+  });
+
+  const clearAllMutation = useMutation({
+    mutationKey: ['persons'],
+    mutationFn: clearPersons,
+    onSuccess: (data: Person[]) => {
+      updatePersons(data);
+    },
+  });
 
   return (
     <TableContainer component={Paper} sx={{ height: '100% !important' }}>
@@ -32,7 +73,9 @@ export default function DataTable() {
                   width: 150,
                   padding: '5px 0px',
                 }}
-                onClick={clearAll}
+                onClick={() => {
+                  clearAllMutation.mutate();
+                }}
               >
                 Clear All
               </Button>
@@ -42,7 +85,7 @@ export default function DataTable() {
         <TableBody>
           {rows.map((row, idx) => (
             <TableRow
-              key={row.name}
+              key={idx}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
@@ -53,7 +96,9 @@ export default function DataTable() {
                 <IconButton
                   aria-label="delete"
                   size="small"
-                  onClick={removePerson(idx)}
+                  onClick={() => {
+                    removePersonMutation.mutate(idx);
+                  }}
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>

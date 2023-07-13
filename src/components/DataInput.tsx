@@ -7,8 +7,10 @@ import styled from '@mui/system/styled';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 import { usePersonState } from '@/hooks/person';
-import { PersonSchema } from '@/schemas/data';
+import { Person, PersonSchema } from '@/schemas/data';
 import { z } from 'zod';
+import { useMutation } from '@tanstack/react-query';
+import { addPerson } from '@/utils/api';
 
 const Item = styled('div')({
   display: 'flex',
@@ -24,8 +26,15 @@ export default function DataInput() {
   const [age, setAge] = useState(1);
   const AgeSchema = z.number().gte(1).lte(120);
   const isValidAge = AgeSchema.safeParse(age).success;
+  const updatePersons = usePersonState((state) => state.updatePersons);
+  const addPersonMutation = useMutation({
+    mutationFn: addPerson,
+    onSuccess: (data: Person[]) => {
+      console.log(data);
+      updatePersons(data);
+    },
+  });
 
-  const addPerson = usePersonState((state) => state.addPerson);
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
@@ -35,7 +44,7 @@ export default function DataInput() {
   const handleAddRow = () => {
     const person = PersonSchema.safeParse({ name, age });
     if (person.success) {
-      addPerson(person.data);
+      addPersonMutation.mutate(person.data);
       setName('');
       setAge(1);
     }

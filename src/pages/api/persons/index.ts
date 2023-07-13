@@ -13,7 +13,9 @@ export default function handler(
     res.status(200).json(currPersons);
   } else if (req.method === 'POST') {
     try {
-      const updatedPersons = addPerson(req.body);
+      const body =
+        typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      const updatedPersons = addPerson(body);
       res.status(201).json(updatedPersons);
     } catch (err: any) {
       res.status(400).json({
