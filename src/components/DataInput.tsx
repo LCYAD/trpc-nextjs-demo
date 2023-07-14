@@ -9,8 +9,7 @@ import { useState } from 'react';
 import { usePersonState } from '@/hooks/person';
 import { Person, PersonSchema } from '@/schemas/data';
 import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
-import { addPerson } from '@/utils/api';
+import { trpc } from '@/utils/trpc';
 
 const Item = styled('div')({
   display: 'flex',
@@ -27,8 +26,7 @@ export default function DataInput() {
   const AgeSchema = z.number().gte(1).lte(120);
   const isValidAge = AgeSchema.safeParse(age).success;
   const updatePersons = usePersonState((state) => state.updatePersons);
-  const addPersonMutation = useMutation({
-    mutationFn: addPerson,
+  const addPersonMutation = trpc.person.add.useMutation({
     onSuccess: (data: Person[]) => {
       updatePersons(data);
     },

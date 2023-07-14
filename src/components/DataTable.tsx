@@ -9,49 +9,25 @@ import { usePersonState } from '@/hooks/person';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button } from '@mui/material';
-import {
-  QueryClient,
-  dehydrate,
-  useMutation,
-  useQuery,
-} from '@tanstack/react-query';
-import { getPersons, clearPersons, removePerson } from '@/utils/api';
+import { trpc } from '@/utils/trpc';
 import { Person } from '@/schemas/data';
-
-export async function getServerSideProps() {
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery(['persons'], getPersons);
-
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
-}
 
 export default function DataTable() {
   const rows = usePersonState((state) => state.persons);
   const updatePersons = usePersonState((state) => state.updatePersons);
-  useQuery({
-    queryKey: ['persons'],
-    queryFn: getPersons,
+
+  trpc.person.list.useQuery(undefined, {
+    onSuccess: (data: Person[]) => {
+      updatePersons(data);
+    },
+  });
+  const removePersonMutation = trpc.person.remove.useMutation({
     onSuccess: (data: Person[]) => {
       updatePersons(data);
     },
   });
 
-  const removePersonMutation = useMutation({
-    mutationKey: ['persons'],
-    mutationFn: removePerson,
-    onSuccess: (data: Person[]) => {
-      updatePersons(data);
-    },
-  });
-
-  const clearAllMutation = useMutation({
-    mutationKey: ['persons'],
-    mutationFn: clearPersons,
+  const clearAllMutation = trpc.person.clear.useMutation({
     onSuccess: (data: Person[]) => {
       updatePersons(data);
     },

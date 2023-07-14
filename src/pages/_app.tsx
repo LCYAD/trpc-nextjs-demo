@@ -1,4 +1,4 @@
-import type { AppProps } from 'next/app';
+import type { AppProps, AppType } from 'next/app';
 import '@/styles/globals.css';
 import {
   Hydrate,
@@ -6,8 +6,9 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import React from 'react';
+import { trpc } from '@/utils/trpc';
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
   const [queryClient] = React.useState(() => new QueryClient());
 
   return (
@@ -17,4 +18,6 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       </Hydrate>
     </QueryClientProvider>
   );
-}
+};
+
+export default trpc.withTRPC(MyApp);
