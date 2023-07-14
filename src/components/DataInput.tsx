@@ -30,7 +30,6 @@ export default function DataInput() {
   const addPersonMutation = useMutation({
     mutationFn: addPerson,
     onSuccess: (data: Person[]) => {
-      console.log(data);
       updatePersons(data);
     },
   });
